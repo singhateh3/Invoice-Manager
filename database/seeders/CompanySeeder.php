@@ -14,6 +14,7 @@ class CompanySeeder extends Seeder
     public function run(): void
     {
         Company::create([
+            'user_id' => 1,
             'name' => 'SinghatehCorp',
             'address' => 'Dalaba',
             'email' => 'singhateh@gmail.com'

@@ -29,4 +29,7 @@ Route::post('/guest/invoice', [InvoiceController::class, 'GuestInvoice']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/invoice', InvoiceController::class);
     Route::apiResource('/company', CompanyController::class);
+    Route::get('/my-invoices', [InvoiceController::class, 'myInvoices']);
 });
+
+Route::get('/company/invoices/{companyId}', [InvoiceController::class, 'companyInvoices']);

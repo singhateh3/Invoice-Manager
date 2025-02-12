@@ -7,9 +7,16 @@ use App\Http\Resources\CompanyResource;
 use App\Http\Resources\CompanyResourceCollection;
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CompanyController extends Controller
 {
+    public function index()
+    {
+        $invoices = Company::all();
+        return response()->json(['message' => 'All Companies', 'Companies' => new CompanyResourceCollection($invoices)]);
+    }
+
     public function store(CompanyRequest $request)
     {
         $validated = $request->validated();
@@ -17,11 +24,7 @@ class CompanyController extends Controller
         return response()->json(['message' => 'Company created Successfully!', 'Company' => new CompanyResource($company)], 201);
     }
 
-    public function index()
-    {
-        $invoices = Company::all();
-        return response()->json(['message' => 'All Companies', 'Companies' => new CompanyResourceCollection($invoices)]);
-    }
+
 
     public function show($id)
     {

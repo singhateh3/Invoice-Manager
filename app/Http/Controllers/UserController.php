@@ -6,6 +6,7 @@ use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\RegisterUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use AuthSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -30,6 +31,9 @@ class UserController extends Controller
         if (!$user && !Hash::check($credentials['password'], $user['password'])) {
             return response()->json(['message' => 'invalid Credentials']);
         }
+
+        AuthSession::putUser($user);
+
         $token = $user->createToken('api-token');
         return response()->json([
             'message' => 'User Login successful',

@@ -22,6 +22,7 @@ class CompanyRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'user_id' => ['required'],
             'name' => ['required', 'string'],
             'address' => ['required', 'string'],
             'email' => ['required']

@@ -15,11 +15,18 @@ class InvoiceResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'company' => $this->company()->latest()->first(),
-            'name' => $this->name,
-            'address' => $this->address,
-            'email' => $this->email,
-            'phone' => $this->phone,
+            "user_id" => $this->user_id,
+            'owner' => $this->whenLoaded('user'),
+            "invoice_no" => $this->invoice_no,
+            'company' => $this->whenLoaded('company'),
+            'from' => $this->from,
+            'from_address' => $this->from_address,
+            'from_email' => $this->from_email,
+            'from_phone' => $this->from_phone,
+            'to' => $this->to,
+            'to_address' => $this->to_address,
+            'to_email' => $this->to_email,
+            'to_phone' => $this->to_phone,
             'item' => $this->item,
             'description' => $this->description,
             'quantity' => $this->quantity,
