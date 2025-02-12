@@ -33,10 +33,9 @@ class InvoiceController extends Controller
     }
 
 
-    // view invoice
-    public function show($id)
+    // view invoice using route model binding
+    public function show(Invoice $invoice)
     {
-        $invoice = Invoice::find($id);
         return response()->json(['Message' => 'Your Invoice', 'Invoice' => new InvoiceResource($invoice)]);
     }
 
@@ -83,9 +82,7 @@ class InvoiceController extends Controller
     public function companyInvoices($id)
     {
         $company = Company::find($id);
-
         $invoice = Invoice::where('company_id', $company->id)->get();
-
         return response()->json(['message' => 'Invoice associated with this company', 'invoices' => new InvoiceResourceCollection($invoice)], 201);
     }
 }
