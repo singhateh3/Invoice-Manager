@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     public function register(RegisterUserRequest $request)
+<<<<<<< HEAD
 {
     // dd($request->all());
     // $data = $request->validated();
@@ -42,6 +43,15 @@ class UserController extends Controller
         'token' => $token->plainTextToken
     ], 201);
 }
+=======
+    {
+        $validated = $request->validated();
+        $user = User::create($validated);
+        Auth::login($user);
+        $token = $user->createToken('api-token');
+        return response()->json(['message' => 'user registered successfully!', 'User' => new UserResource($user), 'token' => $token->plainTextToken], 201);
+    }
+>>>>>>> 74530e6d76c15b465949f28fddf9fb212adaf1bd
 
     public function login(LoginUserRequest $request)
     {
@@ -49,7 +59,11 @@ class UserController extends Controller
 
         $user = User::where(['email' => $credentials['email']])->first();
 
+<<<<<<< HEAD
         if (!$user || !Hash::check($credentials['password'], $user['password'])) {
+=======
+        if (!$user && !Hash::check($credentials['password'], $user['password'])) {
+>>>>>>> 74530e6d76c15b465949f28fddf9fb212adaf1bd
             return response()->json(['message' => 'invalid Credentials']);
         }
 
@@ -58,6 +72,7 @@ class UserController extends Controller
         $token = $user->createToken('api-token');
         return response()->json([
             'message' => 'User Login successful',
+<<<<<<< HEAD
             'user' => new UserResource($user),
             'token' =>  $token->plainTextToken
         ], 201);
@@ -74,4 +89,10 @@ class UserController extends Controller
         $user->currentAccessToken()->delete();
         return response()->json(['message'=> 'Logged out successfully']);
     }
+=======
+            'User' => new UserResource($user),
+            'token' =>  $token->plainTextToken
+        ], 201);
+    }
+>>>>>>> 74530e6d76c15b465949f28fddf9fb212adaf1bd
 }

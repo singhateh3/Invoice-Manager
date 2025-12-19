@@ -22,6 +22,7 @@ class InvoiceStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
+<<<<<<< HEAD
         'company_name' => 'required|string',
         'customer_name' => 'required|string',
         'invoice_date' => 'required|date',
@@ -33,5 +34,29 @@ class InvoiceStoreRequest extends FormRequest
         'discount' => 'nullable|numeric|min:0',
         'tax' => 'nullable|numeric|min:0',
     ];
+=======
+            'invoice_no' => 'required',
+            'from' => 'required',
+            'from_address' => 'nullable',
+            'from_email' => 'nullable',
+            'from_phone' => 'nullable',
+            'company_id' => 'nullable',
+            'to' => 'required',
+            'to_address' => 'nullable',
+            'to_email' => 'nullable',
+            'to_phone' => 'nullable',
+            'item' => 'required',
+            'description' => 'nullable',
+            'quantity' => 'required',
+            'price' => 'required',
+            'tax' => 'nullable',
+            'discount' => 'nullable',
+            'invoice_date' => 'required',
+            'due_date' => ['date', 'nullable'],
+            'note' => 'nullable',
+            'terms' => ['string', 'nullable'],
+            'ship_to' => ['string', 'nullable'],
+        ];
+>>>>>>> 74530e6d76c15b465949f28fddf9fb212adaf1bd
     }
 }

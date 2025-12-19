@@ -12,6 +12,7 @@ class Company extends Model
 {
     use HasFactory;
 
+<<<<<<< HEAD
     // protected $fillable = [
     //     'user_id',
     //     'name',
@@ -28,4 +29,22 @@ class Company extends Model
     // {
     //     return $this->belongsTo(User::class);
     // }
+=======
+    protected $fillable = [
+        'user_id',
+        'name',
+        'address',
+        'email'
+    ];
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+>>>>>>> 74530e6d76c15b465949f28fddf9fb212adaf1bd
 }
