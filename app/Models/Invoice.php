@@ -10,45 +10,35 @@ class Invoice extends Model
 {
     use HasFactory;
 
-    protected  $fillable = [
-        'user_id',
-        'invoice_no',
-        'company_name',
-        'company_address',
-        'invoice_date',
-        'due_date',
-        'customer_name',
-        'customer_address',
-        'discount',
-        'tax',
-        'terms',
-        'ship_to',
-        'items',
-        'total'
+    protected $guarded = [];
+
+    protected $casts = [
+        'invoice_date' => 'date',
+        'due_date' => 'date',
     ];
 
-    // public function company(): BelongsTo
-    // {
-    //     return $this->belongsTo(Company::class);
-    // }
-    protected $casts = [
-        'invoice_date'=> 'date',
-        'due_date'=>'date',
-    ];
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function items(){
-        return $this-> hasMany(InvoiceItem::class);
+    public function items()
+    {
+        return $this->hasMany(InvoiceItem::class);
     }
 
-    public function getSubTotalAttribute (){
-        return $this->items->sum(fn($item)=>$item->quantity * $item->price);
+    public function getSubtotalAttribute()
+    {
+        return $this->items->sum(fn ($item) => $item->quantity * $item->price);
     }
 
-    public function getTotalAttribute(){
-        return $this->subtotal - $this->discount + $this->tax;
+    // Total after discount and tax
+    public function getTotalAttribute()
+    {
+        $discountAmount = $this->discount ?? 0;
+        $taxAmount = $this->tax ?? 0;
+        return $this->subtotal - $discountAmount + $taxAmount;
     }
+
+
 }

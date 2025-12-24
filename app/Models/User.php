@@ -50,15 +50,5 @@ class User extends Authenticatable
         return $this->hasMany(Invoice::class);
     }
 
-<<<<<<< HEAD
-    // public function companies(): HasMany
-    // {
-    //     return $this->hasMany(Company::class);
-    // }
-=======
-    public function companies(): HasMany
-    {
-        return $this->hasMany(Company::class);
-    }
->>>>>>> 74530e6d76c15b465949f28fddf9fb212adaf1bd
+
 }

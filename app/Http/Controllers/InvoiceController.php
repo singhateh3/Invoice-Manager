@@ -3,160 +3,86 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\InvoiceStoreRequest;
-use App\Http\Resources\InvoiceResource;
-use App\Http\Resources\InvoiceResourceCollection;
-use App\Models\Company;
 use App\Models\Invoice;
-use App\Models\User;
-use AuthSession;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-<<<<<<< HEAD
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Request as FacadesRequest;
 
 class InvoiceController extends Controller
 {
 
-public function store(Request $request)
-{
-    // dd($request->all());
-  $validated =  $request->validate([
-        'company_name' => 'required|string',
-        'customer_name' => 'required|string',
-        'invoice_date' => 'required|date',
-        'due_date' => 'nullable|date|after_or_equal:invoice_date',
-        'items' => 'required|array|min:1',
-        'items.*.item' => 'required|string',
-        'items.*.quantity' => 'required|numeric|min:1',
-        'items.*.price' => 'required|numeric|min:0',
-        'discount' => 'nullable|numeric|min:0',
-        'tax' => 'nullable|numeric|min:0',
-    ]);
-
-    // Wrap in transaction
-    DB::beginTransaction();
-    try {
-        $invoice = Invoice::create([
-            'user_id' => auth()->id(),
-            'invoice_no' => 'INV-' . now()->timestamp,
-            'company_name' => $request->company_name,
-            'company_address' => $request->company_address,
-            'customer_name' => $request->customer_name,
-            'customer_address' => $request->customer_address,
-            'discount' => $request->discount ?? 0,
-            'tax' => $request->tax ?? 0,
-            'invoice_date' => $request->invoice_date,
-            'due_date' => $request->due_date,
-            'note' => $request->note,
-            'terms' => $request->terms,
-            'ship_to' => $request->ship_to,
-        ]);
-
-        echo print_r($request->all());
-        Log::info($request->all());
-        // dd(auth()->id());
-        // Save invoice items
-        foreach ($request->items as $item) {
-            $invoice->items()->create([
-                'item' => $item['item'],
-                'description' => $item['description'] ?? null,
-                'quantity' => $item['quantity'],
-                'price' => $item['price'],
-            ]);
-        }
-
-
-        DB::commit();
-
-        // Return invoice with items and totals
-        $invoice->load('items');
-        return response()->json([
-            'invoice' => $invoice,
-            'subtotal' => $invoice->subtotal,
-            'total' => $invoice->total,
-        ], 201);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return response()->json(['error' => $e->getMessage()], 500);
+    public function index(){
+        $invoice = Invoice::with('items')->where(
+            'user_id', auth()->id())->latest()->get();
+            return response()->json(['invoices'=>$invoice]);
     }
-}
-}
-=======
 
-class InvoiceController extends Controller
-{
-    // All invoices with associated users and companies
-    public function index()
-    {
-        $invoices = Invoice::with('user', 'company')->get();
-        return response()->json(['message' => 'All Invoices', 'Invoices' => new InvoiceResourceCollection($invoices)]);
-    }
-    // create a new invoice
     public function store(InvoiceStoreRequest $request)
     {
-        $validated = $request->validated();
-        $validated['user_id'] = Auth::id();
+    $validated = $request->validated();
+
+    $items = $validated['items'];
+    unset($validated['items']);
+
+    $subtotal = collect($items)->sum(fn ($item) =>
+        $item['quantity'] * $item['price']
+    );
+
+    $discountRate = $validated['discount_rate'] ?? 0;
+    $taxRate = $validated['tax_rate'] ?? 0;
+
+    unset($validated['discount_rate'], $validated['tax_rate']);
+
+    $discount = $subtotal * ($discountRate / 100);
+    $tax = $subtotal * ($taxRate / 100);
+    $total = $subtotal -$discount + $tax;
+
+    $validated = array_merge($validated, [
+        'user_id' => auth()->id(),
+        'invoice_no' => 'INV-' . now()->timestamp,
+        'discount' => $discount,
+        'tax' => $tax,
+        'total' => $total,
+    ]);
+
+    $invoice = DB::transaction(function () use ($validated, $items) {
         $invoice = Invoice::create($validated);
-        return response()->json([
-            'message' => 'invoice creation successful',
-            'Invoice' =>  new InvoiceResource($invoice)
-        ], 201);
-    }
 
+        foreach ($items as $item) {
+            $invoice->items()->create($item);
+        }
 
-    // view invoice using route model binding
-    public function show(Invoice $invoice)
-    {
-        return response()->json(['Message' => 'Your Invoice', 'Invoice' => new InvoiceResource($invoice)]);
-    }
+        return $invoice;
+    });
 
-    // update invoice
-    public function update(InvoiceStoreRequest $request, $id)
-    {
-        $invoice = Invoice::find($id);
-        $validated = $request->validated();
-
-        $invoice->update($validated);
-        return response()->json(['message' => 'Invoice updated successfully', 'Invoice' => new InvoiceResource($invoice)], 201);
-    }
-
-    // delete invoice
-    public function destroy($id)
-    {
-        $invoice = Invoice::find($id);
-        $invoice->delete();
-
-        return response()->json(['Message' => 'Invoice deleted successfully']);
-    }
-
-    // user fetch all his invices
-    public function myInvoices()
-    {
-        $user = AuthSession::getUser();
-        $invoices = Invoice::where('user_id', $user->id)->with('company', 'user')->get();
-        return response()->json(['message' => 'Your Invoices', 'Invoices' =>
-        new InvoiceResourceCollection($invoices)]);
-    }
-
-
-    // Create invoice in guest mode
-    public function GuestInvoice(InvoiceStoreRequest $request)
-    {
-        $validated = $request->validated();
-        Invoice::create($validated);
-        return response()->json([
-            'message' => 'invoice creation successful',
-        ], 201);
-    }
-
-    // Invoices from the same company
-    public function companyInvoices($id)
-    {
-        $company = Company::find($id);
-        $invoice = Invoice::where('company_id', $company->id)->get();
-        return response()->json(['message' => 'Invoice associated with this company', 'invoices' => new InvoiceResourceCollection($invoice)], 201);
-    }
+    return response()->json([
+        'invoice' => $invoice->load('items'),
+        'subtotal' => $invoice->subtotal,
+        'discount' => number_format($discount, 2, '.', ''),
+        'tax' => number_format($tax, 2, '.', ''),
+        'total' => number_format($total, 2, '.', ''),
+    ], 201);
 }
->>>>>>> 74530e6d76c15b465949f28fddf9fb212adaf1bd
+
+public function show(Invoice $invoice){
+
+    $invoice->load('items');
+    $subtotal = $invoice->items->sum(fn ($item)=>
+    $item->quantity * $item->price
+    );
+
+    $discount = $invoice->discount ?? 0;
+    $tax = $invoice->tax ?? 0;
+    $total = $subtotal - $discount + $tax;
+
+    return response()->json([
+        'invoice' => $invoice->load('items'),
+        'subtotal' => $invoice->subtotal,
+        'discount' => $discount,
+        'tax' => $tax,
+        'total' => $invoice->total,
+    ], 200);
+
+}
+
+}
