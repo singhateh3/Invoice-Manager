@@ -29,6 +29,9 @@ class InvoiceStoreRequest extends FormRequest
             'items.*.quantity' => 'required|numeric|min:1',
             'items.*.price' => 'required|numeric|min:0',
 
+            'note' => 'nullable',
+            'terms'=>'nullable',
+
             'discount_rate' => 'nullable|numeric|min:0|max:100',
             'tax_rate' => 'nullable|numeric|min:0|max:100',
         ];

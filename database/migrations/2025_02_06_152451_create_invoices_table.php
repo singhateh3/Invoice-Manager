@@ -21,8 +21,8 @@ return new class extends Migration
     $table->string('customer_address')->nullable();
     $table->decimal('discount', 8, 2)->default(0);
     $table->decimal('tax', 8, 2)->default(0);
-
-
+    $table->decimal('tax_rate', 5, 2)->default(0);
+    $table->decimal('discount_rate', 5, 2)->default(0);
     $table->date('invoice_date');
     $table->date('due_date')->nullable();
     $table->longText('note')->nullable();
