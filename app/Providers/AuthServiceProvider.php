@@ -3,7 +3,12 @@
 namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
+
+use App\Models\User;
+use Illuminate\Auth\Access\Response as AccessResponse;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -21,6 +26,10 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Gate::define('view-all-users', function (User $user) {
+            return $user->isAdmin
+                ? AccessResponse::allow()
+                : AccessResponse::denyWithStatus(404);
+        });
     }
 }

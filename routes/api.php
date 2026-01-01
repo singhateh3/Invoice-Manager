@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/company', CompanyController::class);
     Route::get('/my-invoices', [InvoiceController::class, 'myInvoices']);
     Route::post('/logout', [UserController::class, 'logout']);
+    Route::apiResource('/user', UserController::class);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
